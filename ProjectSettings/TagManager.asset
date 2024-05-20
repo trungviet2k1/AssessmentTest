@@ -3,7 +3,8 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 2
-  tags: []
+  tags:
+  - Gem
   layers:
   - Default
   - TransparentFX
@@ -40,4 +41,13 @@ TagManager:
   m_SortingLayers:
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: bg2
+    uniqueID: 3680097593
+    locked: 0
+  - name: demo_table
+    uniqueID: 2516686057
+    locked: 0
+  - name: gemstone
+    uniqueID: 1939940717
     locked: 0
