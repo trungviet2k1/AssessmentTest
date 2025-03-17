@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public class UIPanelMain : MonoBehaviour, IMenu
 {
-    [SerializeField] private Button btnTimer;
+    //[SerializeField] private Button btnTimer;
 
     [SerializeField] private Button btnMoves;
 
@@ -15,13 +15,13 @@ public class UIPanelMain : MonoBehaviour, IMenu
     private void Awake()
     {
         btnMoves.onClick.AddListener(OnClickMoves);
-        btnTimer.onClick.AddListener(OnClickTimer);
+        //btnTimer.onClick.AddListener(OnClickTimer);
     }
 
     private void OnDestroy()
     {
         if (btnMoves) btnMoves.onClick.RemoveAllListeners();
-        if (btnTimer) btnTimer.onClick.RemoveAllListeners();
+        //if (btnTimer) btnTimer.onClick.RemoveAllListeners();
     }
 
     public void Setup(UIMainManager mngr)
