@@ -137,7 +137,6 @@ public class Board
 
             if (IsBoardEmpty())
             {
-                Debug.Log("Bảng trống! Điền lại item.");
                 FillGapsWithNewItems();
             }
         });
@@ -148,6 +147,7 @@ public class Board
         foreach (var cell in m_cells)
         {
             if (!cell.IsEmpty) return false;
+            cell.Clear();
         }
         return true;
     }
@@ -156,14 +156,11 @@ public class Board
     {
         if (bottomSlots.Count < m_matchMin) return;
         hasMatch = false;
+        List<Cell> matchedCells = new List<Cell>();
 
         for (int i = 0; i <= bottomSlots.Count - m_matchMin; i++)
         {
-            if (bottomSlots[i].IsEmpty || bottomSlots[i + 1].IsEmpty || bottomSlots[i + 2].IsEmpty)
-                continue;
-
-            List<Cell> matchedCells = new List<Cell>();
-
+            if (bottomSlots[i].IsEmpty || bottomSlots[i + 1].IsEmpty || bottomSlots[i + 2].IsEmpty) continue;
             for (int j = 0; j < m_matchMin; j++)
             {
                 if (bottomSlots[i + j].IsEmpty) break;
@@ -174,14 +171,13 @@ public class Board
                 matchedCells[0].Item is NormalItem referenceItem &&
                 matchedCells.TrueForAll(cell => cell.Item is NormalItem item && item.ItemType == referenceItem.ItemType))
             {
-                Debug.Log($"Match-{m_matchMin}: {referenceItem.ItemType} từ ô {i} đến {i + m_matchMin - 1}");
+                hasMatch = true;
 
+                Debug.Log($"Match-{m_matchMin}: {referenceItem.ItemType} từ ô {i} đến {i + m_matchMin - 1}");
                 foreach (var cell in matchedCells)
                 {
                     RemoveItem(cell);
                 }
-
-                hasMatch = true;
                 DOVirtual.DelayedCall(0.2f, CheckMatchInBottomSlots);
                 return;
             }

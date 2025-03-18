@@ -99,6 +99,7 @@ public class BoardController : MonoBehaviour
                 {
                     m_board.MoveItemToBottomSlot(selectedCell);
                 }
+                m_board.CheckMatchInBottomSlots();
             }
         }
 
