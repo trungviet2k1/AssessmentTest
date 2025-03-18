@@ -51,7 +51,7 @@ public class UIMainManager : MonoBehaviour
         m_gameManager.StateChangedAction += OnGameStateChange;
     }
 
-    private void OnGameStateChange(GameManager.eStateGame state)
+    public void OnGameStateChange(GameManager.eStateGame state)
     {
         switch (state)
         {
@@ -72,7 +72,7 @@ public class UIMainManager : MonoBehaviour
         }
     }
 
-    private void ShowMenu<T>() where T : IMenu
+    public void ShowMenu<T>() where T : IMenu
     {
         for (int i = 0; i < m_menuList.Length; i++)
         {

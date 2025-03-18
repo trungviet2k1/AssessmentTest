@@ -96,15 +96,10 @@ public class Item
 
     internal virtual void ExplodeView()
     {
-        if (View)
+        if (View != null)
         {
-            View.DOScale(0.1f, 0.1f).OnComplete(
-                () =>
-                {
-                    GameObject.Destroy(View.gameObject);
-                    View = null;
-                }
-                );
+            GameObject.Destroy(View.gameObject);
+            View = null;
         }
     }
 

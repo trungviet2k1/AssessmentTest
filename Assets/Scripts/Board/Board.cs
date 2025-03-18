@@ -25,6 +25,14 @@ public class Board
 
     private int m_matchMin;
 
+    private List<Cell> bottomSlots = new List<Cell>();
+
+    private GameManager m_gameManager;
+
+    private UIMainManager m_ainManager;
+
+    private bool hasMatch;
+
     public Board(Transform transform, GameSettings gameSettings)
     {
         m_root = transform;
@@ -36,7 +44,10 @@ public class Board
 
         m_cells = new Cell[boardSizeX, boardSizeY];
 
+        m_ainManager = GameObject.FindObjectOfType<UIMainManager>();
+        m_gameManager = GameObject.FindObjectOfType<GameManager>();
         CreateBoard();
+        CreateBottomSlots();
     }
 
     private void CreateBoard()
@@ -70,6 +81,149 @@ public class Board
             }
         }
 
+    }
+
+    private void CreateBottomSlots()
+    {
+        bottomSlots = new List<Cell>();
+        GameObject prefabBG = Resources.Load<GameObject>(Constants.PREFAB_CELL_BOTTOM_BACKGROUND);
+        if (prefabBG == null) return;
+
+        float slotSize = 0.9f;
+        float slotSpacing = 0.02f;
+        float totalWidth = (5 * slotSize) + (4 * slotSpacing);
+        float startX = -totalWidth * 0.5f + slotSize * 0.5f;
+        float startY = -boardSizeY * 0.5f - 1.2f;
+
+        for (int i = 0; i < 5; i++)
+        {
+            GameObject go = GameObject.Instantiate(prefabBG);
+            go.transform.position = new Vector3(startX + i * (slotSize + slotSpacing), startY, 0f);
+            go.transform.localScale = Vector3.one * 0.9f;
+            go.transform.SetParent(m_root);
+
+            Cell cell = go.GetComponent<Cell>();
+            if (cell == null) continue;
+            cell.Setup(i, -1);
+            bottomSlots.Add(cell);
+        }
+    }
+
+    public void MoveItemToBottomSlot(Cell selectedCell)
+    {
+        if (selectedCell == null || selectedCell.IsEmpty) return;
+        if (bottomSlots == null || bottomSlots.Count == 0) return;
+        if (bottomSlots.All(slot => !slot.IsEmpty)) return;
+
+        Cell emptySlot = bottomSlots.FirstOrDefault(slot => slot.IsEmpty);
+        if (emptySlot == null) return;
+
+        if (selectedCell.Item == null) return;
+        if (selectedCell.Item.View == null)
+        {
+            selectedCell.Item.SetView();
+            return;
+        }
+
+        selectedCell.Item.View.DOMove(emptySlot.transform.position, 0.3f).OnComplete(() =>
+        {
+            if (emptySlot != null && emptySlot.IsEmpty && selectedCell.Item != null)
+            {
+                selectedCell.Item.SetView();
+                emptySlot.Assign(selectedCell.Item);
+                selectedCell.Clear();
+            }
+            CheckMatchInBottomSlots();
+
+            if (IsBoardEmpty())
+            {
+                Debug.Log("Bảng trống! Điền lại item.");
+                FillGapsWithNewItems();
+            }
+        });
+    }
+
+    private bool IsBoardEmpty()
+    {
+        foreach (var cell in m_cells)
+        {
+            if (!cell.IsEmpty) return false;
+        }
+        return true;
+    }
+
+    public void CheckMatchInBottomSlots()
+    {
+        if (bottomSlots.Count < m_matchMin) return;
+        hasMatch = false;
+
+        for (int i = 0; i <= bottomSlots.Count - m_matchMin; i++)
+        {
+            if (bottomSlots[i].IsEmpty || bottomSlots[i + 1].IsEmpty || bottomSlots[i + 2].IsEmpty)
+                continue;
+
+            List<Cell> matchedCells = new List<Cell>();
+
+            for (int j = 0; j < m_matchMin; j++)
+            {
+                if (bottomSlots[i + j].IsEmpty) break;
+                matchedCells.Add(bottomSlots[i + j]);
+            }
+
+            if (matchedCells.Count == m_matchMin &&
+                matchedCells[0].Item is NormalItem referenceItem &&
+                matchedCells.TrueForAll(cell => cell.Item is NormalItem item && item.ItemType == referenceItem.ItemType))
+            {
+                Debug.Log($"Match-{m_matchMin}: {referenceItem.ItemType} từ ô {i} đến {i + m_matchMin - 1}");
+
+                foreach (var cell in matchedCells)
+                {
+                    RemoveItem(cell);
+                }
+
+                hasMatch = true;
+                DOVirtual.DelayedCall(0.2f, CheckMatchInBottomSlots);
+                return;
+            }
+        }
+
+        DOVirtual.DelayedCall(0.5f, () =>
+        {
+            if (!hasMatch && bottomSlots.All(slot => !slot.IsEmpty))
+            {
+                GameOver();
+            }
+        });
+    }
+
+    private void RemoveItem(Cell cell)
+    {
+        if (cell == null || cell.IsEmpty) return;
+
+        if (cell.Item != null && cell.Item.View != null)
+        {
+            Transform itemTransform = cell.Item.View.transform;
+
+            if (itemTransform.parent != null)
+            {
+                itemTransform.SetParent(null);
+            }
+
+            cell.Item.View.DOScale(0.1f, 0.1f).OnComplete(() =>
+            {
+                GameObject.Destroy(cell.Item.View.gameObject);
+                cell.Item.ExplodeView();
+            });
+        }
+
+        cell.Free();
+    }
+
+    private void GameOver()
+    {
+        if (m_ainManager == null || m_gameManager == null) return;
+        m_gameManager.SetState(GameManager.eStateGame.GAME_OVER);
+        m_ainManager.ShowMenu<UIPanelGameOver>();
     }
 
     internal void Fill()
@@ -350,7 +504,7 @@ public class Board
         var dir = GetMatchDirection(matches);
 
         var bonus = matches.Where(x => x.Item is BonusItem).FirstOrDefault();
-        if(bonus == null)
+        if (bonus == null)
         {
             return matches;
         }

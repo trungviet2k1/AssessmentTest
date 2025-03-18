@@ -201,7 +201,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 78672121}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c1e8289016d380f4fba6f7c4fd1bdd77, type: 3}
+  m_Script: {fileID: 11500000, guid: 2f76ba879b22c85418af36ebff86bc2e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   btnClose: {fileID: 627799494}
@@ -1531,7 +1531,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fab0d030c44a88c4eb202537c3ad03f4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  btnTimer: {fileID: 0}
   btnMoves: {fileID: 459018137}
 --- !u!1 &1545288377
 GameObject:

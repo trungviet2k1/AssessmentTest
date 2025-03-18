@@ -81,7 +81,7 @@ public class BoardController : MonoBehaviour
             if (m_timeAfterFill > m_gameSettings.TimeForHint)
             {
                 m_timeAfterFill = 0f;
-                ShowHint();
+                //ShowHint();
             }
         }
 
@@ -92,6 +92,13 @@ public class BoardController : MonoBehaviour
             {
                 m_isDragging = true;
                 m_hitCollider = hit.collider;
+
+                Cell selectedCell = m_hitCollider.GetComponent<Cell>();
+
+                if (selectedCell != null && selectedCell.Item != null)
+                {
+                    m_board.MoveItemToBottomSlot(selectedCell);
+                }
             }
         }
 
@@ -109,7 +116,7 @@ public class BoardController : MonoBehaviour
                 {
                     StopHints();
 
-                    Cell c1 = m_hitCollider.GetComponent<Cell>();
+                    /*Cell c1 = m_hitCollider.GetComponent<Cell>();
                     Cell c2 = hit.collider.GetComponent<Cell>();
                     if (AreItemsNeighbor(c1, c2))
                     {
@@ -121,7 +128,7 @@ public class BoardController : MonoBehaviour
                         });
 
                         ResetRayCast();
-                    }
+                    }*/
                 }
             }
             else
@@ -296,9 +303,13 @@ public class BoardController : MonoBehaviour
     private void StopHints()
     {
         m_hintIsShown = false;
+        if (m_potentialMatch == null || m_potentialMatch.Count == 0) return;
         foreach (var cell in m_potentialMatch)
         {
-            cell.StopHintAnimation();
+            if (cell != null)
+            {
+                cell.StopHintAnimation();
+            }
         }
 
         m_potentialMatch.Clear();

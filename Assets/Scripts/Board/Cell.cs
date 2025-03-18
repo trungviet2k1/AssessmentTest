@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DG.Tweening;
+using System;
 using UnityEngine;
 
 public class Cell : MonoBehaviour
@@ -17,7 +18,6 @@ public class Cell : MonoBehaviour
 
     public Cell NeighbourLeft { get; set; }
 
-
     public bool IsEmpty => Item == null;
 
     public void Setup(int cellX, int cellY)
@@ -35,6 +35,7 @@ public class Cell : MonoBehaviour
 
     public void Free()
     {
+        Item?.Clear();
         Item = null;
     }
 
@@ -73,7 +74,7 @@ public class Cell : MonoBehaviour
         if (Item == null) return;
 
         Item.ExplodeView();
-        Item = null;
+        DOVirtual.DelayedCall(0.2f, () => Item = null);
     }
 
     internal void AnimateItemForHint()
@@ -83,6 +84,7 @@ public class Cell : MonoBehaviour
 
     internal void StopHintAnimation()
     {
+        if (Item == null || Item.View == null) return;
         Item.StopAnimateForHint();
     }
 
